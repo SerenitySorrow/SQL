@@ -1,0 +1,51 @@
+#In this SQL Project, I am querying a database with multiple tables to quantify statistics about order data from customers
+
+#1--Amount of orders placed in January
+SELECT COUNT(orderid)
+FROM BIT_DB.JanSales
+WHERE length(orderid) = 6
+AND orderid <> 'Order ID';
+
+#2--Amount of order in January for only iPhones
+SELECT COUNT(orderid)
+FROM BIT_DB.JanSales
+WHERE Product='iPhone'
+AND length(orderid) = 6
+AND orderid <> 'Order ID';
+
+#3--Customer Account #'s and orders placed in February
+SELECT distinct acctnum
+FROM BIT_DB.customers cust
+JOIN BIT_DB.FebSales Feb
+ON cust.order_id=FEB.orderid
+WHERE length(orderid) = 6
+AND orderid <> 'Order ID';
+
+#4--Cheapest product sold in January and its price
+SELECT distinct product, price
+FROM BIT_DB.JanSales
+ORDER BY price ASC LIMIT 1;
+
+#5--Revenue for each product sold in January
+SELECT sum(quantity)*price as revenue
+,product
+FROM JanSales
+GROUP BY product;
+
+#6--Products sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and the total revenue
+SELECT sum(Quantity)
+,product
+,sum(quantity)*price as revenue
+FROM BIT_DB.FebSales
+WHERE location = '548 Lincoln St, Seattle, WA 98101'
+GROUP BY product;
+
+#7--Average amount spent by customers who ordered more than 2 items in February 
+SELECT count(distinct cust.acctnum) as Customers
+,avg(quantity*price) as AmountSpent
+FROM BIT_DB.FebSales Feb
+LEFT JOIN customers cust
+ON Feb.orderID=cust.order_id
+WHERE FEB.Quantity > 2
+AND length(orderID) = 6
+AND orderID <> 'Order ID';
