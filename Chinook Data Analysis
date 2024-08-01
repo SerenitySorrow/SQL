@@ -1,0 +1,69 @@
+#SQL queries I have written to answer questions about this dataset. This set includes 11 tables where some are relation and others are not.
+
+#1 -- Getting the total number of tracks for each playlist
+SELECT p.Name AS PlaylistName, COUNT(pt.TrackId) AS TrackCount
+FROM playlists p
+JOIN playlist_track pt ON p.PlaylistId = pt.PlaylistId
+GROUP BY p.Name;
+
+#2 --Show Customers who are not in the US.
+SELECT FirstName
+,LastName
+,CustomerId
+,Country
+FROM customers C
+WHERE country <> 'USA';
+
+#3 --Find the Invoices of customers who are from Brazil.
+SELECT c.FirstName,c.LastName,c.CustomerId
+,i.InvoiceId
+,i.InvoiceDate
+,i.BillingCountry
+FROM customers C
+JOIN invoices i ON i.CustomerId = c.CustomerId
+WHERE country = 'Brazil';
+
+#4 --Provide a query that shows the invoices associated with each sales agent.
+SELECT e.FirstName,e.LastName
+,i.InvoiceId
+,i.InvoiceDate
+FROM customers C
+JOIN invoices i ON i.CustomerId = c.CustomerId
+JOIN employees e ON c.SupportRepId = e.EmployeeId;
+
+#5 --How many Invoices were there in 2009?
+SELECT COUNT(*)
+FROM invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+#6 -- List customers and their total invoice amounts.
+SELECT c.FirstName, c.LastName, SUM(i.Total) AS TotalSpent
+FROM customers c
+JOIN invoices i ON c.CustomerId = i.CustomerId
+GROUP BY c.FirstName, c.LastName
+ORDER BY TotalSpent DESC;
+
+#7 --Showing the total sales made by each sales agent.
+SELECT emp.FirstName
+,emp.LastName,
+ROUND(SUM(Inv.Total), 2) as 'Total Sales' 
+FROM Employees e
+JOIN Customers c 
+ON c.SupportRepId = e.EmployeeId
+JOIN Invoices Inv 
+ON Inv.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent' 
+GROUP BY e.FirstName;
+
+#8 -- Which sales agent made the most dollars in sales in 2009
+SELECT e.FirstName, e.LastName,
+ROUND(SUM(Inv.Total), 2) as 'Total Sales' 
+FROM Employees e
+JOIN Customers c
+ON c.SupportRepId = e.EmployeeId
+JOIN Invoices Inv 
+ON Inv.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent' 
+AND Inv.InvoiceDate LIKE '2009%' 
+GROUP BY e.FirstName
+ORDER BY (round(sum(Inv.Total), 2))  DESC LIMIT 1;
